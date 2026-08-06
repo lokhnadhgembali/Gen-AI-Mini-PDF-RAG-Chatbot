@@ -1,0 +1,26 @@
+StudyStack PEP Course Syllabus:
+
+Module 1: Fundamentals of Node.js & Asynchronous Programming
+- Understanding the Event Loop, Non-blocking I/O, Callbacks, Promises, and Async/Await.
+- Core Modules: fs, path, http, events, and stream processing.
+- Package management with npm and environment configuration using dotenv.
+
+Module 2: Web Server Architecture & Express.js
+- Express Routing, Route parameters vs Query parameters.
+- Building custom middleware for logging, authentication, and error handling.
+- RESTful API design principles and HTTP status code standards.
+
+Module 3: Database Integration & Data Modeling
+- MongoDB fundamentals, BSON data types, and collection indexing.
+- Mongoose ODM: Schemas, Models, Pre/Post hooks, and validation rules.
+- Aggregation pipelines, lookup joins, and pagination strategies.
+
+Module 4: Generative AI, RAG & Vector Embeddings
+- Introduction to LLM completion APIs (Gemini 3.6 Flash & Embedding 2).
+- Document chunking strategies (500 words per chunk with 50-word overlap).
+- Vector space representation and Cosine Similarity matching algorithms.
+- Retrieval-Augmented Generation (RAG) pipeline architecture.
+
+Security & Safety Module: Prompt Injection Defense
+- Direct Prompt Injection: Detecting and blocking jailbreak attempts, developer mode overrides, and system prompt extraction attacks.
+- Indirect Prompt Injection: Sanitizing retrieved PDF context using strict XML delimiter tags (<untrusted_pdf_context>) and hardened system instructions.

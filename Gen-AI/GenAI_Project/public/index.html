@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZARA - Friendly PDF Assistant</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Main Application Container -->
+  <div class="app-shell">
+    
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="zara-avatar">Z</div>
+        <div>
+          <h2>ZARA</h2>
+          <span class="nav-subtitle">Smart & Secure PDF Assistant</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="doc-status-pill" id="docStatusPill">
+          <span class="status-dot"></span>
+          <span id="docStatusText">Loading status...</span>
+        </div>
+        <button class="btn btn-outline" id="quickSampleBtn">
+          ⚡ Use Demo PDF
+        </button>
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          🌙
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+      
+      <!-- Left Panel: Simple Upload & Instructions -->
+      <aside class="sidebar-panel">
+        
+        <!-- Step 1: Upload Card -->
+        <div class="guide-card">
+          <div class="card-header">
+            <span class="step-num">1</span>
+            <div>
+              <h3>Choose Your PDF</h3>
+              <p>Upload a file to start asking questions.</p>
+            </div>
+          </div>
+
+          <form id="uploadForm">
+            <input type="file" id="pdfFileInput" accept=".pdf,.txt" hidden>
+            <div class="upload-dropzone" id="dropZone">
+              <div class="icon-circle">📄</div>
+              <p class="dropzone-title">Click to select a PDF file</p>
+              <span class="dropzone-sub">or drag & drop file here</span>
+              <span class="file-name-tag" id="selectedFileName"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="uploadBtn">
+              Upload & Process PDF
+            </button>
+          </form>
+        </div>
+
+        <!-- Step 2: Test Security Shield Card -->
+        <div class="guide-card security-guide">
+          <div class="card-header">
+            <span class="step-num shield-num">🛡️</span>
+            <div>
+              <h3>Security Guardrail</h3>
+              <p>Try testing prompt injection attacks:</p>
+            </div>
+          </div>
+
+          <div class="example-buttons">
+            <button class="chip-btn chip-safe" onclick="runQuickPrompt('valid')">
+              ✅ Ask Valid Question
+            </button>
+            <button class="chip-btn chip-danger" onclick="runQuickPrompt('jailbreak')">
+              🚨 Test Jailbreak Attack
+            </button>
+            <button class="chip-btn chip-danger" onclick="runQuickPrompt('dan')">
+              ⚠️ Test Developer Mode Attack
+            </button>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Panel: Chat Area -->
+      <main class="chat-panel">
+        
+        <!-- Chat History Window -->
+        <div class="chat-window" id="chatWindow">
+          <div class="welcome-box">
+            <div class="big-zara-avatar">Z</div>
+            <h3>Hi! I'm ZARA</h3>
+            <p>I can help you read and answer questions from any PDF document. Upload a file on the left or try out a suggested question below!</p>
+            
+            <div class="quick-suggestions">
+              <span>Try asking:</span>
+              <button onclick="runQuickPrompt('valid')">💬 What topics are covered in week 2?</button>
+              <button onclick="runQuickPrompt('mongodb')">💬 Tell me about MongoDB</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chatForm" class="chat-input-bar">
+          <input 
+            type="text" 
+            id="userInput" 
+            placeholder="Type your question about the PDF here..." 
+            autocomplete="off" 
+            required
+          >
+          <button type="submit" class="btn btn-primary send-btn" id="sendBtn">
+            Send Question
+          </button>
+        </form>
+
+      </main>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
