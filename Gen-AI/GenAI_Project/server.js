@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Configure Multer for file upload
 const upload = multer({
   dest: path.join(__dirname, 'uploads'),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 // Ensure uploads dir exists
@@ -38,9 +38,6 @@ if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
 
 let currentDocumentName = 'course-syllabus.pdf';
 
-/**
- * Helper function to call Gemini Flash for answer synthesis
- */
 async function generateAnswerWithGemini(systemPrompt, userQuery, framedContext) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
@@ -48,18 +45,13 @@ async function generateAnswerWithGemini(systemPrompt, userQuery, framedContext) 
   }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
-
   const promptText = `${systemPrompt}\n\nRetrieved Document Context:\n${framedContext}\n\nUser Question:\n${userQuery}`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [
-        {
-          parts: [{ text: promptText }]
-        }
-      ]
+      contents: [{ parts: [{ text: promptText }] }]
     })
   });
 
@@ -69,26 +61,13 @@ async function generateAnswerWithGemini(systemPrompt, userQuery, framedContext) 
   }
 
   const data = await response.json();
-  if (
-    !data.candidates ||
-    !data.candidates[0] ||
-    !data.candidates[0].content ||
-    !data.candidates[0].content.parts ||
-    !data.candidates[0].content.parts[0]
-  ) {
+  if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
     throw new Error('Invalid response structure returned by Gemini API.');
   }
 
   return data.candidates[0].content.parts[0].text;
 }
 
-// -------------------------------------------------------------
-// API Endpoints
-// -------------------------------------------------------------
-
-/**
- * GET /api/status - Get current store stats
- */
 app.get('/api/status', (req, res) => {
   const stats = getStoreStats();
   res.json({
@@ -98,9 +77,6 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-/**
- * POST /api/index - Index default or sample PDF/text
- */
 app.post('/api/index', async (req, res) => {
   try {
     let sampleFilePath = path.join(__dirname, 'course-syllabus.pdf');
@@ -110,7 +86,6 @@ app.post('/api/index', async (req, res) => {
       rawText = await extractText(sampleFilePath);
       currentDocumentName = 'course-syllabus.pdf';
     } else {
-      // Default sample content if PDF file is not present yet
       rawText = `
 StudyStack PEP Course Syllabus:
 Week 1: Fundamentals of Node.js, Event Loop, Modules, and File System APIs.
@@ -136,9 +111,6 @@ Security Module: Defense against Direct Prompt Injections and Indirect PDF Conte
   }
 });
 
-/**
- * POST /api/upload - Upload custom PDF file and index it
- */
 app.post('/api/upload', upload.single('document'), async (req, res) => {
   try {
     if (!req.file) {
@@ -155,7 +127,6 @@ app.post('/api/upload', upload.single('document'), async (req, res) => {
       rawText = fs.readFileSync(filePath, 'utf-8');
     }
 
-    // Clean up temporary upload file
     fs.unlinkSync(filePath);
 
     const chunks = chunkText(rawText, 500, 50);
@@ -172,9 +143,6 @@ app.post('/api/upload', upload.single('document'), async (req, res) => {
   }
 });
 
-/**
- * POST /api/ask - Ask question using RAG + Prompt Injection Security
- */
 app.post('/api/ask', async (req, res) => {
   try {
     const { question, enforceSecurity = true } = req.body;
@@ -183,7 +151,6 @@ app.post('/api/ask', async (req, res) => {
       return res.status(400).json({ error: 'Field "question" is required.' });
     }
 
-    // Step 1: Security Inspection
     const securityCheck = sanitizeUserQuery(question);
 
     if (enforceSecurity && !securityCheck.isSafe) {
@@ -196,17 +163,10 @@ app.post('/api/ask', async (req, res) => {
       });
     }
 
-    // Step 2: Retrieve relevant chunks using Vector Similarity Search
     const topChunks = await searchVectorStore(securityCheck.sanitizedQuery, 3);
-    const { framedContext, rawText } = sanitizeAndFrameContext(topChunks);
-
-    // Step 3: Answer Generation via Gemini LLM
+    const { framedContext } = sanitizeAndFrameContext(topChunks);
     const systemPrompt = getHardenedSystemPrompt();
-    const answer = await generateAnswerWithGemini(
-      systemPrompt,
-      securityCheck.sanitizedQuery,
-      framedContext
-    );
+    const answer = await generateAnswerWithGemini(systemPrompt, securityCheck.sanitizedQuery, framedContext);
 
     res.json({
       isSafe: true,
@@ -225,8 +185,14 @@ app.post('/api/ask', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 RAG Chatbot Server running on http://localhost:${PORT}`);
-  console.log(`====================================================`);
-});
+// Export the Express app for Vercel's serverless runtime.
+module.exports = app;
+
+// Start a normal HTTP server only when running locally.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log('====================================================');
+    console.log(`🚀 RAG Chatbot Server running on http://localhost:${PORT}`);
+    console.log('====================================================');
+  });
+}
